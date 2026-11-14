@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 async function openCatalog(page) {
-  await page.goto('./');
+  await page.goto('./', {waitUntil:'domcontentloaded'});
   await expect(page.locator('.product')).toHaveCount(43);
 }
 const card = (page, name) => page.locator('.product').filter({ has: page.getByRole('heading', {name, exact: true}) });
@@ -18,7 +18,7 @@ test('all source products, prices and local photographs are present', async ({pa
   expect(products).toHaveLength(43);
   expect(new Set(products.map(p => p.id)).size).toBe(43);
   for (const image of new Set(products.map(p => p.image))) {
-    const response = await request.get(image);
+    const response = await request.get(image, {maxRetries:2});
     expect(response.ok(), image).toBeTruthy();
     expect(response.headers()['content-type']).toContain('image/');
   }
@@ -46,7 +46,7 @@ test('cart calculates delivery, persists and copies exactly the requested format
   await expect(page.locator('#subtotal')).toHaveText('4 040 ₽');
   await expect(page.locator('#delivery')).toHaveText('Бесплатно');
   await expect(page.locator('#header-count')).toHaveText('7');
-  await page.reload();
+  await page.reload({waitUntil:'domcontentloaded'});
   await expect(page.locator('#order-text')).toHaveValue(expected);
   await page.getByRole('button', {name:'Скопировать заказ'}).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(expected);
