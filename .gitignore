@@ -1,0 +1,9 @@
+node_modules/
+test-results/
+playwright-report/
+form-source.html
+form-*.html
+form-data.json
+test-photo.jpg
+*.zip
+screenshots/
